@@ -42,7 +42,7 @@ public class BungeeListener implements Listener {
         this.plugin = instance;
     }
 
-    @EventHandler
+    @EventHandler(priority= EventPriority.HIGHEST)
     public void onPing(ProxyPingEvent e) {
         if ((e.getConnection() == null) || (e.getConnection().getVirtualHost() == null) || (e.getConnection().getVirtualHost().getHostName() == null)) {
             return;
