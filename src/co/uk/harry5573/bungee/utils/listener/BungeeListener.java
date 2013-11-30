@@ -15,10 +15,12 @@
 package co.uk.harry5573.bungee.utils.listener;
 
 import co.uk.harry5573.bungee.utils.BungeeUtils;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.ServerPing.Players;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
@@ -40,7 +42,7 @@ public class BungeeListener implements Listener {
         this.plugin = instance;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onPing(ProxyPingEvent e) {
         if ((e.getConnection() == null) || (e.getConnection().getVirtualHost() == null) || (e.getConnection().getVirtualHost().getHostName() == null)) {
             return;
