@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -35,16 +36,16 @@ public class CommandAddServer extends Command {
         super(name, permission, aliases);
         this.plugin = instance;
     }
-
+    
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(plugin.messagePermissionDenied);
+            sender.sendMessage(new ComponentBuilder("").append(plugin.messagePermissionDenied).create());
             return;
         }
 
         if (args.length != 3) {
-            sender.sendMessage(ChatColor.RED + "Usage: " + ChatColor.GOLD + "/addserver [name] [address] [port]");
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Usage: " + ChatColor.GOLD + "/addserver [name] [address] [port]").create());
             return;
         }
 
@@ -55,6 +56,6 @@ public class CommandAddServer extends Command {
         ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(address, port), "", false);
         ProxyServer.getInstance().getServers().put(name, serverInfo);
 
-        sender.sendMessage(ChatColor.GREEN + "Added server " + ChatColor.GOLD + name);
+        sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "Added server " + ChatColor.GOLD + name).create());
     }
 }

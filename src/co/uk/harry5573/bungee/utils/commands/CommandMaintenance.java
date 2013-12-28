@@ -19,6 +19,7 @@ import co.uk.harry5573.bungee.utils.BungeeUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -38,12 +39,12 @@ public class CommandMaintenance extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(plugin.messagePermissionDenied);
+            sender.sendMessage(new ComponentBuilder("").append(plugin.messagePermissionDenied).create());
             return;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.AQUA + "Usage: " + ChatColor.YELLOW + "/maintenance toggle");
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "Usage: " + ChatColor.YELLOW + "/maintenance toggle").create());
             return;
         }
 
@@ -51,15 +52,15 @@ public class CommandMaintenance extends Command {
             if (args[0].equalsIgnoreCase("toggle")) {
                 boolean status = this.handleMaintenance();
                 if (status) {
-                    sender.sendMessage(ChatColor.GREEN + "Maintenance has been enabled on all servers!");
+                    sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "Maintenance has been enabled on all servers!").create());
                     return;
                 }
            
-                sender.sendMessage(ChatColor.RED + "Maintenance has been disabled on all servers!");
+                sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Maintenance has been disabled on all servers!").create());
                 return;
             }
 
-            sender.sendMessage(ChatColor.AQUA + "Usage: " + ChatColor.YELLOW + "/maintenance toggle");
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "Usage: " + ChatColor.YELLOW + "/maintenance toggle").create());
         }
     }
 

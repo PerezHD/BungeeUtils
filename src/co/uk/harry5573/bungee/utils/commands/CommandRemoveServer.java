@@ -19,6 +19,7 @@ import co.uk.harry5573.bungee.utils.BungeeUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.plugin.Command;
 
 /**
@@ -37,20 +38,20 @@ public class CommandRemoveServer extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(plugin.messagePermissionDenied);
+            sender.sendMessage(new ComponentBuilder("").append(plugin.messagePermissionDenied).create());
             return;
         }
 
         if (args.length != 1) {
-            sender.sendMessage(ChatColor.RED + "Usage: " + ChatColor.GOLD + "/removeserver [name]");
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Usage: " + ChatColor.GOLD + "/removeserver [name]").create());
             return;
         }
 
         String name = args[0];
         if (ProxyServer.getInstance().getServers().remove(name) == null) {
-            sender.sendMessage(ChatColor.RED + "Could not find server " + ChatColor.GOLD + name);
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Could not find server " + ChatColor.GOLD + name).create());
         } else {
-            sender.sendMessage(ChatColor.GREEN + "Removed server " + ChatColor.GOLD + name);
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "Removed server " + ChatColor.GOLD + name).create());
         }
     }
 }

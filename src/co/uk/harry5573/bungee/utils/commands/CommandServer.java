@@ -19,6 +19,8 @@ import co.uk.harry5573.bungee.utils.BungeeUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -39,23 +41,22 @@ public class CommandServer extends Command {
     public void execute(CommandSender sender, String[] args) {
         if (sender instanceof ProxiedPlayer) {
             if (args.length != 1) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "You are currently connected to " + ChatColor.GOLD + ProxyServer.getInstance().getPlayer(sender.getName()).getServer().getInfo().getName());
-                sender.sendMessage(ChatColor.GREEN + "To change servers, type " + ChatColor.AQUA + "/server [name]");
-                sender.sendMessage(ChatColor.GREEN + "To list servers, type " + ChatColor.AQUA + "/listservers");
+                sender.sendMessage(new ComponentBuilder("").append(ChatColor.DARK_PURPLE + "You are currently connected to " + ChatColor.GOLD + ProxyServer.getInstance().getPlayer(sender.getName()).getServer().getInfo().getName()).create());
+                sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "To change servers, type " + ChatColor.AQUA + "/server [name]").create());
+                sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "To list servers, type " + ChatColor.AQUA + "/listservers").create());
                 return;
             }
             if (args.length == 1) {
                 String server = args[0];
                 if (ProxyServer.getInstance().getServers().get(server) == null) {
-                    sender.sendMessage(ChatColor.RED + "We could not find the server " + ChatColor.GOLD + args[0]);
+                    sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "We could not find the server " + ChatColor.GOLD + args[0]).create());
                     return;
                 }
-                sender.sendMessage(ChatColor.GOLD + "Connecting you to " + ChatColor.RED + server);
+                sender.sendMessage(new ComponentBuilder("").append(ChatColor.GOLD + "Connecting you to " + ChatColor.RED + server).create());
                 ((ProxiedPlayer) sender).connect(ProxyServer.getInstance().getServers().get(server));
             }
-
         } else {
-            sender.sendMessage(ChatColor.RED + "This is a player command!");
+            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "This is a player command!").create());
         }
     }
 }

@@ -20,6 +20,7 @@ import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -48,6 +49,6 @@ public class CommandListServers extends Command {
         if (serverList.length() != 0) {
             serverList.setLength(serverList.length() - 2);
         }
-        sender.sendMessage(ChatColor.AQUA + "Current servers: " + ChatColor.GOLD + serverList.toString());
+        sender.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "Current servers: " + ChatColor.GOLD + serverList.toString()).create());
     }
 }

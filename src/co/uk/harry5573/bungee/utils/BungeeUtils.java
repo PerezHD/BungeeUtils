@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.ChatColor;
@@ -90,15 +89,15 @@ public class BungeeUtils extends Plugin implements Listener {
     }
 
     public void loadConfigs() {
-        File folder = new File("plugins/" + this.getDescription().getName());
-        String filename = "/config.ini";
+        File folder = this.getDataFolder();
+        String filename = "config.ini";
 
         Properties config = new Properties();
         try {
             if (!folder.exists()) {
                 folder.mkdirs();
             }
-            File file = new File(folder + filename);
+            File file = new File(folder, filename);
             if (!file.exists()) {
                 file.createNewFile();
                 config.load(new FileReader(file));
@@ -117,7 +116,7 @@ public class BungeeUtils extends Plugin implements Listener {
             this.messageMOTDMaintenance = this.colorMessage(config.getProperty("motdMaintenance", "&cServer in &bMaintenance &cmode!"));
             this.defaultServerName = config.getProperty("defaultServer", "hub");
             this.tabChatColor = ChatColor.valueOf(config.getProperty("tabColor", "YELLOW"));
-            this.tabStaffChatColor = ChatColor.valueOf(config.getProperty("tabStaffColor", "LIGHT_PURPLE"));
+            this.tabStaffChatColor = ChatColor.valueOf(config.getProperty("tabStaffColor", "AQUA"));
         } catch (Exception e) {
             ProxyServer.getInstance().getLogger().severe("Unable to load configuration file, please make sure it exists!  Using default values");
         }

@@ -18,6 +18,7 @@ package co.uk.harry5573.bungee.utils.commands;
 import co.uk.harry5573.bungee.utils.BungeeUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.plugin.Command;
 
 /**
@@ -36,10 +37,10 @@ public class CommandReload extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(plugin.messagePermissionDenied);
+            sender.sendMessage(new ComponentBuilder("").append(plugin.messagePermissionDenied).create());
             return;
         }
-        sender.sendMessage(ChatColor.YELLOW + "Reloading all configs!");
+        sender.sendMessage(new ComponentBuilder("").append(ChatColor.YELLOW + "Reloading all configs!").create());
         plugin.loadConfigs();
     }
 }

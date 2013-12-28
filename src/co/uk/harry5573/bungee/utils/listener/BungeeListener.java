@@ -15,12 +15,11 @@
 package co.uk.harry5573.bungee.utils.listener;
 
 import co.uk.harry5573.bungee.utils.BungeeUtils;
-import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.ServerPing.Players;
-import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
@@ -72,7 +71,7 @@ public class BungeeListener implements Listener {
     public void onLogin(PostLoginEvent e) {
         ProxiedPlayer p = e.getPlayer();
         if (plugin.isMaintOn && !p.hasPermission("bungeeutils.bypassmaintenance")) {
-            p.disconnect(plugin.messageServerKickMaintenance);
+            p.disconnect(new ComponentBuilder("").append(plugin.messageServerKickMaintenance).create());
         }
     }
 
@@ -80,7 +79,7 @@ public class BungeeListener implements Listener {
     public void onLoginServer(ServerConnectEvent e) {
         ProxiedPlayer p = e.getPlayer();
         if (plugin.isMaintOn && !p.hasPermission("bungeeutils.bypassmaintenance")) {
-            p.disconnect(plugin.messageServerKickMaintenance);
+            p.disconnect(new ComponentBuilder("").append(plugin.messageServerKickMaintenance).create());
             return;
         }
 
@@ -99,21 +98,21 @@ public class BungeeListener implements Listener {
             p.setDisplayName(newname);
         }
     }
-
+    
     @EventHandler(priority = EventPriority.LOWEST)
     public void onKickServer(ServerKickEvent e) {
         ProxiedPlayer p = e.getPlayer();
         if (plugin.isMaintOn && !p.hasPermission("bungeeutils.bypassmaintenance")) {
-            p.disconnect(plugin.messageServerKickMaintenance);
+            p.disconnect(new ComponentBuilder("").append(plugin.messageServerKickMaintenance).create());
             return;
         }
-
-        if (!e.getPlayer().getServer().getInfo().getName().equals(ProxyServer.getInstance().getServers().get("default").getName())) {
-            String kickreason = e.getKickReason();
-            if (!kickreason.startsWith("§0")) {
-                e.setCancelled(true);
-                p.sendMessage(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + kickreason);
-            }
+        
+        e.setCancelled(true);
+        p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReasonComponent()).create());
+        if (p.getServer() != e.getCancelServer()) {
+            p.connect(e.getCancelServer());
+            //Work?
+            p.connect(ProxyServer.getInstance().getServerInfo(plugin.defaultServerName));
         }
     }
 }
