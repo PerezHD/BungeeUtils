@@ -108,7 +108,7 @@ public class BungeeListener implements Listener {
         }
         
         e.setCancelled(true);
-        p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReasonComponent()).create());
+        p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReason()).create());
         if (p.getServer() != e.getCancelServer()) {
             p.connect(e.getCancelServer());
             //Work?
