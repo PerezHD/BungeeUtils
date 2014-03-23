@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package co.uk.harry5573.bungee.utils.commands;
 
 import co.uk.harry5573.bungee.utils.BungeeUtils;
+import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -37,7 +38,7 @@ public class CommandReload extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(new ComponentBuilder("").append(plugin.messagePermissionDenied).create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.NOPERM)).create());
             return;
         }
         sender.sendMessage(new ComponentBuilder("").append(ChatColor.YELLOW + "Reloading all configs!").create());

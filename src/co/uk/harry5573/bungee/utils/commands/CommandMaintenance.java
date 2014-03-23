@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package co.uk.harry5573.bungee.utils.commands;
 
 import co.uk.harry5573.bungee.utils.BungeeUtils;
+import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -39,7 +40,7 @@ public class CommandMaintenance extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(new ComponentBuilder("").append(plugin.messagePermissionDenied).create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.NOPERM)).create());
             return;
         }
 
@@ -70,18 +71,16 @@ public class CommandMaintenance extends Command {
      * @return
      */
     private boolean handleMaintenance() {
-        if (plugin.isMaintOn != true) {
-            plugin.isMaintOn = true;
-            plugin.loadServerListSample(true);
+        if (plugin.maintenanceEnabled != true) {
+            plugin.maintenanceEnabled = true;
             for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
                 if (!player.hasPermission("bungeeutils.bypassmaintenance")) {
-                    player.disconnect(plugin.messageServerKickMaintenance);
+                    player.disconnect(plugin.messages.get(EnumMessage.KICKMAINTENANCE));
                 }
             }
             return true;
         } else {
-            plugin.isMaintOn = false;
-            plugin.loadServerListSample(false);
+            plugin.maintenanceEnabled = false;
             return false;
         }
     }

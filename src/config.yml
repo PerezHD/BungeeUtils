@@ -1,0 +1,31 @@
+# BungeeUtils Configuration
+defaultserver: hub
+
+# Don't touch this line. Its for logging purposes
+peakplayers: 0
+
+messages:
+    noperm: '&cPermission Denied'
+    kickmaintenance: '&cYou have been kicked due to the server being in &bmaintenance &cmode. &aJoin back soon'
+motd:
+    maintenance: '&cServer currently in &bmaintenance &cmode!'
+    unknownplayer: '&6&l>&4&l>&6&l> &aWelcome to &dArkham&4Network &av&91.7.5&a!                            &6&l>&4&l>&6&l> &eUPDATE: &bTokens being released soon!'
+    player: '&6&l>&4&l>&6&l> &aWelcome to &dArkham&4Network &av&91.7.5&a, &6[player]&a!         &6&l>&4&l>&6&l> &eUPDATE: &bTokens being released soon!'
+tabcolor:
+    default: 'YELLOW'
+    staff: 'LIGHT_PURPLE'
+hoverplayerlist:
+- '&7&m------------&r &b&l&oArkhamNetwork&r &c&l&o1.7.5 &7&m------------'
+- ''
+- '&bPlayers online: &f(&a[online]&f/&a[max]&f)'
+- '&bMost players ever online: &6[peakplayers]'
+- ''
+- '&fWebsite: &ahttps://www.arkhamnetwork.org/'
+- '&fForums: &ahttps://www.arkhamnetwork.org/community/'
+- '&fStore: &ahttps://buy.arkhamnetwork.org/'
+- '&fVote: &ahttps://www.arkhamnetwork.org/vote'
+- ''
+- '&7&m------------------------------------------'
+hoverplayerlistmaintenance:
+- '&cThe server is currently in &bmaintenance &cmode.'
+- '&dWe will be back soon!'

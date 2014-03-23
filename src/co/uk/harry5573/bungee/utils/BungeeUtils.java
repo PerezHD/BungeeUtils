@@ -12,21 +12,26 @@ import co.uk.harry5573.bungee.utils.commands.CommandMaintenance;
 import co.uk.harry5573.bungee.utils.commands.CommandReload;
 import co.uk.harry5573.bungee.utils.commands.CommandRemoveServer;
 import co.uk.harry5573.bungee.utils.commands.CommandServer;
+import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
+import co.uk.harry5573.bungee.utils.util.MessageUtil;
+import com.google.common.collect.Maps;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import net.craftminecraft.bungee.bungeeyaml.bukkitapi.file.FileConfiguration;
+import net.craftminecraft.bungee.bungeeyaml.bukkitapi.file.YamlConfiguration;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.ServerPing.PlayerInfo;
 import net.md_5.bungee.api.plugin.PluginManager;
 
 /**
@@ -36,16 +41,22 @@ import net.md_5.bungee.api.plugin.PluginManager;
 public class BungeeUtils extends Plugin implements Listener {
 
     public static BungeeUtils plugin;
-    public boolean isMaintOn = false;
-    private Path sampleConfigPath;
-    private List<String> sampleLines;
-    public String messagePermissionDenied;
-    public String messageServerKickMaintenance;
-    public String messageMOTDMaintenance;
+    
+    public boolean maintenanceEnabled = false;
+
     public String defaultServerName;
-    public ServerPing.PlayerInfo[] serverPingInfo;
-    public ChatColor tabChatColor;
-    public ChatColor tabStaffChatColor;
+    
+    public PlayerInfo[] serverHoverPlayerListDefault;
+    public PlayerInfo[] serverHoverPlayerListMaintenance;
+
+    public ChatColor tabDefaultColor;
+    public ChatColor tabStaffColor;
+    public HashMap<EnumMessage, String> messages = Maps.newHashMap();
+
+    public int peakPlayers = 0;
+    public int currentMaxPlayers = 0;
+
+    FileConfiguration config = null;
 
     @Override
     public void onEnable() {
@@ -53,16 +64,26 @@ public class BungeeUtils extends Plugin implements Listener {
         this.log("BungeeUtils by Harry5573 starting up!");
 
         File configFile = new File(this.getDataFolder(), "sampleinfo.txt");
-        this.sampleConfigPath = configFile.toPath();
         this.loadConfigs();
 
         ProxyServer.getInstance().getPluginManager().registerListener(this, new BungeeListener(this));
 
         this.registerCommands();
-        /**
-         * Command maintenance
-         */
+
         this.log("BungeeUtils by Harry5573 started!");
+
+        this.getProxy().getScheduler().schedule(this, new Runnable() {
+            @Override
+            public void run() {
+                List<String> hoverList = config.getStringList("hoverplayerlist");
+                PlayerInfo[] info = new PlayerInfo[hoverList.size()];
+                for (int i = 0; i < info.length; i++) {
+                    String line = MessageUtil.translateToColorCode(hoverList.get(i).replace("[peakplayers]", String.valueOf(peakPlayers)).replace("[online]", String.valueOf(getProxy().getOnlineCount())).replace("[max]", String.valueOf(currentMaxPlayers)));
+                    info[i] = new PlayerInfo(line.length() > 0 ? line : "§r", "");
+                }
+                serverHoverPlayerListDefault = info;
+            }
+        }, 1, 4, TimeUnit.SECONDS);
     }
 
     @Override
@@ -70,105 +91,45 @@ public class BungeeUtils extends Plugin implements Listener {
         log("BungeeUtils by Harry5573 Disabled");
     }
 
-    /**
-     * Colours a message
-     *
-     * @param messages
-     * @return
-     */
-    private List<String> colorize(List<String> messages) {
-        List<String> newList = new ArrayList<>(messages.size());
-        for (String msg : messages) {
-            newList.add(this.colorMessage(msg));
-        }
-        return newList;
-    }
-
-    private String colorMessage(String msg) {
-        return ChatColor.translateAlternateColorCodes('&', msg);
-    }
-
     public void loadConfigs() {
-        File folder = this.getDataFolder();
-        String filename = "config.ini";
+        this.saveResource("config.yml", false);
+        config = this.getConfig("config.yml");
 
-        Properties config = new Properties();
-        try {
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-            File file = new File(folder, filename);
-            if (!file.exists()) {
-                file.createNewFile();
-                config.load(new FileReader(file));
-                config.setProperty("messageNoPerm", "&cPermission Denied");
-                config.setProperty("messageMaintenanceKick", "&cYou have been kicked due to &bMaintenance being enabled. &cJoin back soon");
-                config.setProperty("motdMaintenance", "&cServer in &bMaintenance &cmode!");
-                config.setProperty("defaultServer", "hub");
-                config.setProperty("tabColor", "YELLOW");
-                config.setProperty("tabStaffColor", "LIGHT_PURPLE");
-                config.store(new FileWriter(file), getDescription().getName() + " Configuration");
-            } else {
-                config.load(new FileReader(file));
-            }
-            this.messagePermissionDenied = this.colorMessage(config.getProperty("messageNoPerm", "cPermission Denied"));
-            this.messageServerKickMaintenance = this.colorMessage(config.getProperty("messageMaintenanceKick", "&cYou have been kicked due to &bMaintenance being enabled. &cJoin back soon"));
-            this.messageMOTDMaintenance = this.colorMessage(config.getProperty("motdMaintenance", "&cServer in &bMaintenance &cmode!"));
-            this.defaultServerName = config.getProperty("defaultServer", "hub");
-            this.tabChatColor = ChatColor.valueOf(config.getProperty("tabColor", "YELLOW"));
-            this.tabStaffChatColor = ChatColor.valueOf(config.getProperty("tabStaffColor", "AQUA"));
-        } catch (Exception e) {
-            ProxyServer.getInstance().getLogger().severe("Unable to load configuration file, please make sure it exists!  Using default values");
+        this.defaultServerName = config.getString("defaultserver");
+        this.messages.put(EnumMessage.NOPERM, MessageUtil.translateToColorCode(config.getString("messages.noperm")));
+        this.messages.put(EnumMessage.KICKMAINTENANCE, MessageUtil.translateToColorCode(config.getString("messages.kickmaintenance")));
+        this.messages.put(EnumMessage.MOTDMAINTENANCE, MessageUtil.translateToColorCode(config.getString("motd.maintenance")));
+        this.messages.put(EnumMessage.MOTDUNKNOWNPLAYER, MessageUtil.translateToColorCode(config.getString("motd.unknownplayer")));
+        this.messages.put(EnumMessage.MOTDKNOWNPLAYER, MessageUtil.translateToColorCode(config.getString("motd.player")));
+        this.tabDefaultColor = ChatColor.valueOf(config.getString("tabcolor.default"));
+        this.tabStaffColor = ChatColor.valueOf(config.getString("tabcolor.staff"));
+        this.peakPlayers = config.getInt("peakplayers");
+
+        List<String> hoverList = config.getStringList("hoverplayerlist");
+        PlayerInfo[] info = new PlayerInfo[hoverList.size()];
+        for (int i = 0; i < info.length; i++) {
+            String line = MessageUtil.translateToColorCode(hoverList.get(i).replace("[peakplayers]", String.valueOf(this.peakPlayers)));
+            info[i] = new PlayerInfo(line.length() > 0 ? line : "§r", "");
         }
+        this.serverHoverPlayerListDefault = info;
 
-        if (Files.notExists(this.sampleConfigPath)) {
-            try {
-                Files.createDirectories(this.sampleConfigPath.getParent());
-                Files.createFile(this.sampleConfigPath);
-                this.sampleLines = new ArrayList<>();
-            } catch (IOException ex) {
-            }
-        } else {
-            try {
-                this.sampleLines = this.colorize(Files.readAllLines(this.sampleConfigPath, StandardCharsets.UTF_8));
-            } catch (IOException ex) {
-            }
+        List<String> hoverListMaintenance = config.getStringList("hoverplayerlistmaintenance");
+        PlayerInfo[] infoMaintenance = new PlayerInfo[hoverListMaintenance.size()];
+        for (int i = 0; i < infoMaintenance.length; i++) {
+            String line = MessageUtil.translateToColorCode(hoverListMaintenance.get(i).replace("[peakplayers]", String.valueOf(this.peakPlayers)));
+            infoMaintenance[i] = new PlayerInfo(line.length() > 0 ? line : "§r", "");
         }
-
-        this.loadServerListSample(false);
+        this.serverHoverPlayerListMaintenance = infoMaintenance;
     }
-
+    
+    public void setPeakPlayers(int amount) {
+        this.peakPlayers = amount;
+        config.set("peakplayers", amount);
+        this.saveConfig("config.yml", config);
+    }
+    
     public void log(String msg) {
         this.getLogger().info(msg);
-    }
-
-    public void loadServerListSample(boolean maintenanceEnable) {
-        if (maintenanceEnable) {
-            List<String> linesMaintenance = new ArrayList<>();
-            linesMaintenance.add(ChatColor.RED + "The server is currently in maintenance mode!");
-            linesMaintenance.add(ChatColor.LIGHT_PURPLE + "We will be back soon!");
-
-            ServerPing.PlayerInfo[] info = new ServerPing.PlayerInfo[linesMaintenance.size()];
-
-            for (int i = 0; i < info.length; i++) {
-                String line = (String) linesMaintenance.get(i);
-                info[i] = new ServerPing.PlayerInfo(line.length() > 0 ? line : "§r", "");
-            }
-            this.serverPingInfo = info;
-        } else {
-            List<String> linesNoMaintenance = new ArrayList<>();
-
-            for (String s : this.sampleLines) {
-                linesNoMaintenance.add(s);
-            }
-
-            ServerPing.PlayerInfo[] info = new ServerPing.PlayerInfo[linesNoMaintenance.size()];
-            for (int i = 0; i < info.length; i++) {
-                String line = (String) linesNoMaintenance.get(i);
-                info[i] = new ServerPing.PlayerInfo(line.length() > 0 ? line : "§r", "");
-            }
-            this.serverPingInfo = info;
-        }
     }
 
     public void registerCommands() {
@@ -181,5 +142,80 @@ public class BungeeUtils extends Plugin implements Listener {
         pm.registerCommand(this, new CommandReload(this, "bureload", "", new String[]{"abreload"}));
         pm.registerCommand(this, new CommandAddServer(this, "addserver", "", new String[]{"add"}));
         pm.registerCommand(this, new CommandRemoveServer(this, "removeserver", "", new String[]{"delserver"}));
+    }
+
+    public InputStream getResource(String filename) {
+        if (filename == null) {
+            throw new IllegalArgumentException("Filename cannot be null");
+        }
+
+        try {
+            URL url = this.getClass().getClassLoader().getResource(filename);
+
+            if (url == null) {
+                return null;
+            }
+
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(false);
+            return connection.getInputStream();
+        } catch (IOException ex) {
+            return null;
+        }
+    }
+
+    public void saveResource(String resourcePath, boolean replace) {
+        if (resourcePath == null || resourcePath.equals("")) {
+            throw new IllegalArgumentException("ResourcePath cannot be null or empty");
+        }
+
+        resourcePath = resourcePath.replace('\\', '/');
+        InputStream in = getResource(resourcePath);
+        if (in == null) {
+            throw new IllegalArgumentException("The embedded resource '" + resourcePath + "' cannot be found");
+        }
+
+        File outFile = new File(getDataFolder(), resourcePath);
+        int lastIndex = resourcePath.lastIndexOf('/');
+        File outDir = new File(getDataFolder(), resourcePath.substring(0, lastIndex >= 0 ? lastIndex : 0));
+
+        if (!outDir.exists()) {
+            outDir.mkdirs();
+        }
+
+        try {
+            if (!outFile.exists() || replace) {
+                OutputStream out = new FileOutputStream(outFile);
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.close();
+                in.close();
+            } else {
+            }
+        } catch (IOException ex) {
+        }
+    }
+
+    public FileConfiguration getConfig(String configName) {
+        return YamlConfiguration.loadConfiguration(new File(getDataFolder() + File.separator + configName));
+    }
+
+    public void saveConfig(String configName, FileConfiguration config) {
+        try {
+            config.save(new File(getDataFolder() + File.separator + configName));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public boolean configExists(String configName) {
+        return new File(getDataFolder() + File.separator + configName).exists();
+    }
+
+    public String clearifyIP(String input) {
+        return input.substring(1).split(":")[0];
     }
 }

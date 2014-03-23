@@ -15,11 +15,12 @@
 package co.uk.harry5573.bungee.utils.listener;
 
 import co.uk.harry5573.bungee.utils.BungeeUtils;
+import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
+import com.google.common.collect.Maps;
+import java.util.HashMap;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.ServerPing;
-import net.md_5.bungee.api.ServerPing.Players;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
@@ -40,46 +41,54 @@ public class BungeeListener implements Listener {
     public BungeeListener(BungeeUtils instance) {
         this.plugin = instance;
     }
-
-    @EventHandler(priority= EventPriority.HIGHEST)
+    
+    public HashMap<String, String> knownClientIPS = Maps.newHashMap();
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPing(ProxyPingEvent e) {
-        if ((e.getConnection() == null) || (e.getConnection().getVirtualHost() == null) || (e.getConnection().getVirtualHost().getHostName() == null)) {
+        PendingConnection connection = e.getConnection();
+        if (connection == null || connection.getVirtualHost() == null || connection.getVirtualHost().getHostName() == null) {
             return;
         }
 
-        ServerPing serverPing = new ServerPing();
-        serverPing.setFavicon(e.getResponse().getFavicon());
-        serverPing.setVersion(e.getResponse().getVersion());
-
-        Players players = e.getResponse().getPlayers();
-
-        if (plugin.isMaintOn) {
-            serverPing.setDescription(plugin.messageMOTDMaintenance);
-            players.setMax(0);
-            players.setOnline(0);
-            serverPing.setPlayers(players);
+        if (plugin.maintenanceEnabled) {
+            e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDMAINTENANCE));
+            e.getResponse().getPlayers().setMax(0);
+            e.getResponse().getPlayers().setOnline(0);
+            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
         } else {
-            serverPing.setDescription(e.getResponse().getDescription());
-            serverPing.setPlayers(players);
+            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListDefault);
+            String ip = this.plugin.clearifyIP(e.getConnection().getAddress().toString());
+            if (this.knownClientIPS.containsKey(ip)) {
+                e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDKNOWNPLAYER).replace("[player]", this.knownClientIPS.get(ip)));
+            } else {
+                e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDUNKNOWNPLAYER));
+            }
         }
 
-        serverPing.getPlayers().setSample(plugin.serverPingInfo);
-        e.setResponse(serverPing);
+        plugin.currentMaxPlayers = e.getResponse().getPlayers().getMax();
+        if (e.getResponse().getPlayers().getOnline() > plugin.peakPlayers) {
+            plugin.setPeakPlayers(e.getResponse().getPlayers().getOnline());
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(PostLoginEvent e) {
         ProxiedPlayer p = e.getPlayer();
-        if (plugin.isMaintOn && !p.hasPermission("bungeeutils.bypassmaintenance")) {
-            p.disconnect(new ComponentBuilder("").append(plugin.messageServerKickMaintenance).create());
+        if (!this.knownClientIPS.containsKey(p.getName())) {
+            this.knownClientIPS.put(plugin.clearifyIP(p.getAddress().toString()), p.getName());
+        }
+        if (plugin.maintenanceEnabled && !p.hasPermission("bungeeutils.bypassmaintenance")) {
+            p.disconnect(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.KICKMAINTENANCE)).create());
+            return;
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLoginServer(ServerConnectEvent e) {
         ProxiedPlayer p = e.getPlayer();
-        if (plugin.isMaintOn && !p.hasPermission("bungeeutils.bypassmaintenance")) {
-            p.disconnect(new ComponentBuilder("").append(plugin.messageServerKickMaintenance).create());
+        if (plugin.maintenanceEnabled && !p.hasPermission("bungeeutils.bypassmaintenance")) {
+            p.disconnect(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.KICKMAINTENANCE)).create());
             return;
         }
 
@@ -87,9 +96,9 @@ public class BungeeListener implements Listener {
         String newname = null;
 
         if (p.hasPermission("bungeeutils.staffcolor")) {
-            newname = plugin.tabStaffChatColor + name;
+            newname = plugin.tabStaffColor + name;
         } else {
-            newname = plugin.tabChatColor + name;
+            newname = plugin.tabDefaultColor + name;
         }
 
         if (newname.length() > 16) {
@@ -102,17 +111,21 @@ public class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onKickServer(ServerKickEvent e) {
         ProxiedPlayer p = e.getPlayer();
-        if (plugin.isMaintOn && !p.hasPermission("bungeeutils.bypassmaintenance")) {
-            p.disconnect(new ComponentBuilder("").append(plugin.messageServerKickMaintenance).create());
+        if (plugin.maintenanceEnabled && !p.hasPermission("bungeeutils.bypassmaintenance")) {
+            p.disconnect(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.KICKMAINTENANCE)).create());
             return;
         }
         
         e.setCancelled(true);
         p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReason()).create());
+        
+        if (e.getCancelServer() == null) {
+            p.connect(plugin.getProxy().getServerInfo(plugin.defaultServerName));
+            return;
+        }
+        
         if (p.getServer() != e.getCancelServer()) {
             p.connect(e.getCancelServer());
-            //Work?
-            p.connect(ProxyServer.getInstance().getServerInfo(plugin.defaultServerName));
         }
     }
 }
