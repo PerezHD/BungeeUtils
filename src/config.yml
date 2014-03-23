@@ -1,6 +1,9 @@
 # BungeeUtils Configuration
 defaultserver: hub
 
+# Do you want us to change /server and add /listservers?
+addlistservers: true
+
 # Don't touch this line. Its for logging purposes
 peakplayers: 0
 

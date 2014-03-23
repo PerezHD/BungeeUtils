@@ -57,6 +57,8 @@ public class BungeeUtils extends Plugin implements Listener {
     public int currentMaxPlayers = 0;
     public int currentOnlinePlayers = 0;
 
+    public boolean addListServers = true;
+    
     FileConfiguration config = null;
 
     @Override
@@ -107,6 +109,7 @@ public class BungeeUtils extends Plugin implements Listener {
         this.tabDefaultColor = ChatColor.valueOf(config.getString("tabcolor.default"));
         this.tabStaffColor = ChatColor.valueOf(config.getString("tabcolor.staff"));
         this.peakPlayers = config.getInt("peakplayers");
+        this.addListServers = config.getBoolean("addlistservers");
 
         List<String> hoverList = config.getStringList("hoverplayerlist");
         PlayerInfo[] info = new PlayerInfo[hoverList.size()];
@@ -134,8 +137,12 @@ public class BungeeUtils extends Plugin implements Listener {
 
         pm.registerCommand(this, new CommandMaintenance(this, "maintenance", "", new String[]{"maint"}));
         pm.registerCommand(this, new CommandLobby(this, "hub", "", new String[]{"lobby"}));
-        pm.registerCommand(this, new CommandServer(this, "server", "", new String[]{"listservers"}));
-        pm.registerCommand(this, new CommandListServers(this, "listservers", "", new String[]{"serverlist"}));
+
+        if (this.addListServers) {
+            pm.registerCommand(this, new CommandServer(this, "server", "", new String[]{"listservers"}));
+            pm.registerCommand(this, new CommandListServers(this, "listservers", "", new String[]{"serverlist"}));
+        }
+
         pm.registerCommand(this, new CommandReload(this, "bureload", "", new String[]{"abreload"}));
         pm.registerCommand(this, new CommandAddServer(this, "addserver", "", new String[]{"add"}));
         pm.registerCommand(this, new CommandRemoveServer(this, "removeserver", "", new String[]{"delserver"}));
