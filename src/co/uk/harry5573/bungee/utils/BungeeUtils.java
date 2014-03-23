@@ -55,6 +55,7 @@ public class BungeeUtils extends Plugin implements Listener {
 
     public int peakPlayers = 0;
     public int currentMaxPlayers = 0;
+    public int currentOnlinePlayers = 0;
 
     FileConfiguration config = null;
 
@@ -78,12 +79,14 @@ public class BungeeUtils extends Plugin implements Listener {
                 List<String> hoverList = config.getStringList("hoverplayerlist");
                 PlayerInfo[] info = new PlayerInfo[hoverList.size()];
                 for (int i = 0; i < info.length; i++) {
-                    String line = MessageUtil.translateToColorCode(hoverList.get(i).replace("[peakplayers]", String.valueOf(peakPlayers)).replace("[online]", String.valueOf(getProxy().getOnlineCount())).replace("[max]", String.valueOf(currentMaxPlayers)));
+                    String line = MessageUtil.translateToColorCode(hoverList.get(i).replace("[peakplayers]", String.valueOf(peakPlayers)).replace("[online]", String.valueOf(currentOnlinePlayers)).replace("[max]", String.valueOf(currentMaxPlayers)));
                     info[i] = new PlayerInfo(line.length() > 0 ? line : "§r", "");
                 }
                 serverHoverPlayerListDefault = info;
+
+                saveConfig("config.yml", config);
             }
-        }, 1, 4, TimeUnit.SECONDS);
+        }, 1, 5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -120,12 +123,6 @@ public class BungeeUtils extends Plugin implements Listener {
             infoMaintenance[i] = new PlayerInfo(line.length() > 0 ? line : "§r", "");
         }
         this.serverHoverPlayerListMaintenance = infoMaintenance;
-    }
-    
-    public void setPeakPlayers(int amount) {
-        this.peakPlayers = amount;
-        config.set("peakplayers", amount);
-        this.saveConfig("config.yml", config);
     }
     
     public void log(String msg) {

@@ -67,8 +67,11 @@ public class BungeeListener implements Listener {
         }
 
         plugin.currentMaxPlayers = e.getResponse().getPlayers().getMax();
-        if (e.getResponse().getPlayers().getOnline() > plugin.peakPlayers) {
-            plugin.setPeakPlayers(e.getResponse().getPlayers().getOnline());
+        int online = e.getResponse().getPlayers().getOnline();
+
+        plugin.currentOnlinePlayers = online;
+        if (online > plugin.peakPlayers) {
+            plugin.peakPlayers = online;
         }
     }
 
