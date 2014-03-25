@@ -86,6 +86,7 @@ public class BungeeUtils extends Plugin implements Listener {
                 }
                 serverHoverPlayerListDefault = info;
 
+                config.set("peakplayers", peakPlayers);
                 saveConfig("config.yml", config);
             }
         }, 1, 5, TimeUnit.SECONDS);
