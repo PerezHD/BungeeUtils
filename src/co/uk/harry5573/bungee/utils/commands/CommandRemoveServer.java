@@ -39,20 +39,20 @@ public class CommandRemoveServer extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.NOPERM)).create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + plugin.messages.get(EnumMessage.NOPERM)).create());
             return;
         }
 
         if (args.length != 1) {
-            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Usage: " + ChatColor.GOLD + "/removeserver [name]").create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + ChatColor.RED + "Usage: " + ChatColor.GOLD + "/removeserver [name]").create());
             return;
         }
 
         String name = args[0];
         if (ProxyServer.getInstance().getServers().remove(name) == null) {
-            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Could not find server " + ChatColor.GOLD + name).create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + ChatColor.RED + "Could not find server " + ChatColor.GOLD + name).create());
         } else {
-            sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "Removed server " + ChatColor.GOLD + name).create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + ChatColor.GREEN + "Removed server " + ChatColor.GOLD + name).create());
         }
     }
 }

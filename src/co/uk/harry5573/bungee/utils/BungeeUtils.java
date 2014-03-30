@@ -41,11 +41,11 @@ import net.md_5.bungee.api.plugin.PluginManager;
 public class BungeeUtils extends Plugin implements Listener {
 
     public static BungeeUtils plugin;
-    
-    public boolean maintenanceEnabled = false;
+
+    public boolean maintenanceEnabled = true;
 
     public String defaultServerName;
-    
+
     public PlayerInfo[] serverHoverPlayerListDefault;
     public PlayerInfo[] serverHoverPlayerListMaintenance;
 
@@ -58,8 +58,10 @@ public class BungeeUtils extends Plugin implements Listener {
     public int currentOnlinePlayers = 0;
 
     public boolean addListServers = true;
+
+    public FileConfiguration config = null;
     
-    FileConfiguration config = null;
+    public String prefix = ChatColor.YELLOW + "[BungeeUtils] ";
 
     @Override
     public void onEnable() {
@@ -89,7 +91,7 @@ public class BungeeUtils extends Plugin implements Listener {
                 config.set("peakplayers", peakPlayers);
                 saveConfig("config.yml", config);
             }
-        }, 1, 5, TimeUnit.SECONDS);
+        }, 1, 10, TimeUnit.SECONDS);
     }
 
     @Override
@@ -127,8 +129,10 @@ public class BungeeUtils extends Plugin implements Listener {
             infoMaintenance[i] = new PlayerInfo(line.length() > 0 ? line : "§r", "");
         }
         this.serverHoverPlayerListMaintenance = infoMaintenance;
+
+        this.maintenanceEnabled = config.getBoolean("maintenancemode");
     }
-    
+
     public void log(String msg) {
         this.getLogger().info(msg);
     }
@@ -137,7 +141,7 @@ public class BungeeUtils extends Plugin implements Listener {
         PluginManager pm = ProxyServer.getInstance().getPluginManager();
 
         pm.registerCommand(this, new CommandMaintenance(this, "maintenance", "", new String[]{"maint"}));
-        pm.registerCommand(this, new CommandLobby(this, "hub", "", new String[]{"lobby"}));
+        pm.registerCommand(this, new CommandLobby(this, "hub", "", new String[]{"lobby", "quit", "leave", "disconnect"}));
 
         if (this.addListServers) {
             pm.registerCommand(this, new CommandServer(this, "server", "", new String[]{"listservers"}));
@@ -190,13 +194,13 @@ public class BungeeUtils extends Plugin implements Listener {
 
         try {
             if (!outFile.exists() || replace) {
-                OutputStream out = new FileOutputStream(outFile);
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
+                try (OutputStream out = new FileOutputStream(outFile)) {
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
                 }
-                out.close();
                 in.close();
             } else {
             }

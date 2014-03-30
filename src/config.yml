@@ -7,6 +7,9 @@ addlistservers: true
 # Don't touch this line. Its for logging purposes
 peakplayers: 0
 
+# Don't tocuh this line. For storage purposes.
+maintenancemode: true
+
 messages:
     noperm: '&cPermission Denied'
     kickmaintenance: '&cYou have been kicked due to the server being in &bmaintenance &cmode. &aJoin back soon'

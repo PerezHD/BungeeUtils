@@ -41,12 +41,12 @@ public class CommandAddServer extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("bungeeutils.admin")) {
-            sender.sendMessage(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.NOPERM)).create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + plugin.messages.get(EnumMessage.NOPERM)).create());
             return;
         }
 
         if (args.length != 3) {
-            sender.sendMessage(new ComponentBuilder("").append(ChatColor.RED + "Usage: " + ChatColor.GOLD + "/addserver [name] [address] [port]").create());
+            sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + ChatColor.RED + "Usage: " + ChatColor.GOLD + "/addserver [name] [address] [port]").create());
             return;
         }
 
@@ -57,6 +57,6 @@ public class CommandAddServer extends Command {
         ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(address, port), "", false);
         ProxyServer.getInstance().getServers().put(name, serverInfo);
 
-        sender.sendMessage(new ComponentBuilder("").append(ChatColor.GREEN + "Added server " + ChatColor.GOLD + name).create());
+        sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + ChatColor.GREEN + "Added server " + ChatColor.GOLD + name).create());
     }
 }

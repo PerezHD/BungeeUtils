@@ -41,7 +41,7 @@ public class CommandReload extends Command {
             sender.sendMessage(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.NOPERM)).create());
             return;
         }
-        sender.sendMessage(new ComponentBuilder("").append(ChatColor.YELLOW + "Reloading all configs!").create());
+        sender.sendMessage(new ComponentBuilder("").append(plugin.prefix + ChatColor.YELLOW + "Plugin reloaded!").create());
         plugin.loadConfigs();
     }
 }
