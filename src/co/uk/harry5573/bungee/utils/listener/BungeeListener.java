@@ -19,6 +19,7 @@ import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ServerPing.Protocol;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -29,7 +30,6 @@ import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-
 /**
  *
  * @author Harry5573
@@ -41,9 +41,9 @@ public class BungeeListener implements Listener {
     public BungeeListener(BungeeUtils instance) {
         this.plugin = instance;
     }
-    
+
     public HashMap<String, String> knownClientIPS = Maps.newHashMap();
-    
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPing(ProxyPingEvent e) {
         PendingConnection connection = e.getConnection();
@@ -55,9 +55,14 @@ public class BungeeListener implements Listener {
             e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDMAINTENANCE));
             e.getResponse().getPlayers().setMax(0);
             e.getResponse().getPlayers().setOnline(0);
-            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
+            if (e.getResponse().getVersion().getProtocol() < 5) {
+                e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
+            }
+            e.getResponse().setVersion(new Protocol(ChatColor.YELLOW + "Maintenance Mode", 99));
         } else {
-            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListDefault);
+            if (e.getResponse().getVersion().getProtocol() < 5) {
+                e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListDefault);
+            }
             String ip = this.plugin.clearifyIP(e.getConnection().getAddress().toString());
             if (this.knownClientIPS.containsKey(ip)) {
                 e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDKNOWNPLAYER).replace("[player]", this.knownClientIPS.get(ip)));
