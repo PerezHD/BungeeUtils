@@ -55,14 +55,10 @@ public class BungeeListener implements Listener {
             e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDMAINTENANCE));
             e.getResponse().getPlayers().setMax(0);
             e.getResponse().getPlayers().setOnline(0);
-            if (e.getResponse().getVersion().getProtocol() < 5) {
-                e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
-            }
+            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
             e.getResponse().setVersion(new Protocol(ChatColor.YELLOW + "Maintenance Mode", 99));
         } else {
-            if (e.getResponse().getVersion().getProtocol() < 5) {
-                e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListDefault);
-            }
+            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListDefault);
             String ip = this.plugin.clearifyIP(e.getConnection().getAddress().toString());
             if (this.knownClientIPS.containsKey(ip)) {
                 e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDKNOWNPLAYER).replace("[player]", this.knownClientIPS.get(ip)));
