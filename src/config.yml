@@ -13,25 +13,32 @@ maintenancemode: true
 messages:
     noperm: '&cPermission Denied'
     kickmaintenance: '&cYou have been kicked due to the server being in &bmaintenance &cmode. &aJoin back soon'
+
 motd:
-    maintenance: '&cServer currently in &bmaintenance &cmode!'
-    unknownplayer: '&6&l>&4&l>&6&l> &aWelcome to &dArkham&4Network &av&91.7.5&a!                            &6&l>&4&l>&6&l> &eUPDATE: &bTokens being released soon!'
-    player: '&6&l>&4&l>&6&l> &aWelcome to &dArkham&4Network &av&91.7.5&a, &6[player]&a!         &6&l>&4&l>&6&l> &eUPDATE: &bTokens being released soon!'
+  maintenance: '&cServer currently in maintenance mode!                 &eCheck twitter
+    for updates &b@ArkhamNetwork'
+  unknownplayer: '&7&l-&9&l-&3&l-&b&l> &4&lArkham&6&lNetwork &e&l1.7.5 &b&l<&3&l-&9&l-&7&l-                  &e&l&nUPDATE&r&8&l:
+    &a&oSkyWars &b&o2.0 &a&osoon &6& &41.7.6 &bSupport added.'
+  player: '&7&l-&9&l-&3&l-&b&l> &4&lArkham&6&lNetwork &e&l1.7.5 &b&l<&3&l-&9&l-&7&l-
+    &d[player]     &e&l&nUPDATE&r&8&l: &a&oSkyWars &b&o2.0 &a&osoon &6& &41.7.6 &bSupport
+    added.'
+
 tabcolor:
-    default: 'YELLOW'
-    staff: 'LIGHT_PURPLE'
+  default: YELLOW
+  staff: LIGHT_PURPLE
+
 hoverplayerlist:
-- '&7&m------------&r &b&l&oArkhamNetwork&r &c&l&o1.7.5 &7&m------------'
+- '&7&l-&9&l-&3&l-&b&l> &4&lArkham&6&lNetwork &e&l1.7.5 &b&l<&3&l-&9&l-&7&l-'
 - ''
-- '&bPlayers online: &f(&a[online]&f/&a[max]&f)'
-- '&bMost players ever online: &6[peakplayers]'
+- '&6Players Online: &a[online]&c/&a[max]'
+- '&6Highest Playercount: &a[peakplayers]&c/&a[max]'
 - ''
-- '&fWebsite: &ahttps://www.arkhamnetwork.org/'
-- '&fForums: &ahttps://www.arkhamnetwork.org/community/'
-- '&fStore: &ahttps://buy.arkhamnetwork.org/'
-- '&fVote: &ahttps://www.arkhamnetwork.org/vote'
-- ''
-- '&7&m------------------------------------------'
+- '&dWebsite: &ahttps://www.arkhamnetwork.org/'
+- '&dForums: &ahttps://www.arkhamnetwork.org/community/'
+- '&dStore: &ahttps://buy.arkhamnetwork.org/'
+- '&dVote: &ahttps://www.arkhamnetwork.org/vote'
+- '&dTokens: &ahttps://buy.arkhamnetwork.org/tokens'
+- '&dCasino: &ahttps://buy.arkhamnetwork.org/casino'
 hoverplayerlistmaintenance:
 - '&cThe server is currently in &bmaintenance &cmode.'
 - '&dWe will be back soon!'
