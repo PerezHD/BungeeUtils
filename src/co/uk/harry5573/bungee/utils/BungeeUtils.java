@@ -68,11 +68,9 @@ public class BungeeUtils extends Plugin implements Listener {
         plugin = this;
         this.log("BungeeUtils by Harry5573 starting up!");
 
-        File configFile = new File(this.getDataFolder(), "sampleinfo.txt");
         this.loadConfigs();
 
         ProxyServer.getInstance().getPluginManager().registerListener(this, new BungeeListener(this));
-
         this.registerCommands();
 
         this.log("BungeeUtils by Harry5573 started!");
@@ -216,7 +214,6 @@ public class BungeeUtils extends Plugin implements Listener {
         try {
             config.save(new File(getDataFolder() + File.separator + configName));
         } catch (IOException ex) {
-            ex.printStackTrace();
         }
     }
 

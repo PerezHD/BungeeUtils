@@ -21,6 +21,7 @@ import java.util.HashMap;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing.Protocol;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
@@ -36,7 +37,7 @@ import net.md_5.bungee.event.EventPriority;
  */
 public class BungeeListener implements Listener {
 
-    BungeeUtils plugin;
+    private BungeeUtils plugin;
 
     public BungeeListener(BungeeUtils instance) {
         this.plugin = instance;
@@ -67,9 +68,9 @@ public class BungeeListener implements Listener {
             }
         }
 
-        plugin.currentMaxPlayers = e.getResponse().getPlayers().getMax();
         int online = e.getResponse().getPlayers().getOnline();
 
+        plugin.currentMaxPlayers = e.getResponse().getPlayers().getMax();
         plugin.currentOnlinePlayers = online;
         if (online > plugin.peakPlayers) {
             plugin.peakPlayers = online;
@@ -97,21 +98,20 @@ public class BungeeListener implements Listener {
         }
 
         String name = p.getName();
-        String newname = null;
 
         if (p.hasPermission("bungeeutils.staffcolor")) {
-            newname = plugin.tabStaffColor + name;
+            name = plugin.tabStaffColor + name;
         } else {
-            newname = plugin.tabDefaultColor + name;
+            name = plugin.tabDefaultColor + name;
         }
 
-        if (newname.length() > 16) {
-            p.setDisplayName(newname.substring(0, 16));
+        if (name.length() > 16) {
+            p.setDisplayName(name.substring(0, 16));
         } else {
-            p.setDisplayName(newname);
+            p.setDisplayName(name);
         }
     }
-    
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onKickServer(ServerKickEvent e) {
         ProxiedPlayer p = e.getPlayer();
@@ -119,17 +119,13 @@ public class BungeeListener implements Listener {
             p.disconnect(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.KICKMAINTENANCE)).create());
             return;
         }
-        
-        e.setCancelled(true);
-        p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReason()).create());
-        
-        if (e.getCancelServer() == null) {
-            p.connect(plugin.getProxy().getServerInfo(plugin.defaultServerName));
+
+        ServerInfo info = plugin.getProxy().getServerInfo(plugin.defaultServerName);
+        if (p.getServer() != info) {
+            p.connect(info);
+            e.setCancelled(true);
+            p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReason()).create());
             return;
-        }
-        
-        if (p.getServer() != e.getCancelServer()) {
-            p.connect(e.getCancelServer());
         }
     }
 }
