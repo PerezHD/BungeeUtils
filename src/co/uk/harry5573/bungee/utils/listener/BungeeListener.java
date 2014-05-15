@@ -18,7 +18,10 @@ import co.uk.harry5573.bungee.utils.BungeeUtils;
 import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.ServerPing.Protocol;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -31,19 +34,20 @@ import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+
 /**
  *
  * @author Harry5573
  */
 public class BungeeListener implements Listener {
 
-    private BungeeUtils plugin;
+    private final BungeeUtils plugin;
 
     public BungeeListener(BungeeUtils instance) {
         this.plugin = instance;
     }
 
-    public HashMap<String, String> knownClientIPS = Maps.newHashMap();
+    public ConcurrentHashMap<String, String> knownClientIPS = new ConcurrentHashMap<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPing(ProxyPingEvent e) {
@@ -51,26 +55,29 @@ public class BungeeListener implements Listener {
         if (connection == null || connection.getVirtualHost() == null || connection.getVirtualHost().getHostName() == null) {
             return;
         }
-
+        
+        ServerPing response = e.getResponse();
+        
         if (plugin.maintenanceEnabled) {
-            e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDMAINTENANCE));
-            e.getResponse().getPlayers().setMax(0);
-            e.getResponse().getPlayers().setOnline(0);
-            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
-            e.getResponse().setVersion(new Protocol(ChatColor.YELLOW + "Maintenance Mode", 99));
+            response.setDescription(plugin.messages.get(EnumMessage.MOTDMAINTENANCE));
+            response.getPlayers().setMax(0);
+            response.getPlayers().setOnline(0);
+            response.getPlayers().setSample(plugin.serverHoverPlayerListMaintenance);
+            response.setVersion(new Protocol(ChatColor.YELLOW + "Maintenance Mode", 99));
         } else {
-            e.getResponse().getPlayers().setSample(plugin.serverHoverPlayerListDefault);
-            String ip = this.plugin.clearifyIP(e.getConnection().getAddress().toString());
+            response.getPlayers().setSample(plugin.serverHoverPlayerListDefault);
+            String ip = this.plugin.clearifyIP(connection.getAddress().toString());
             if (this.knownClientIPS.containsKey(ip)) {
-                e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDKNOWNPLAYER).replace("[player]", this.knownClientIPS.get(ip)));
+                response.setDescription(plugin.messages.get(EnumMessage.MOTDKNOWNPLAYER).replace("[player]", this.knownClientIPS.get(ip)));
             } else {
-                e.getResponse().setDescription(plugin.messages.get(EnumMessage.MOTDUNKNOWNPLAYER));
+                response.setDescription(plugin.messages.get(EnumMessage.MOTDUNKNOWNPLAYER));
             }
         }
-
-        int online = e.getResponse().getPlayers().getOnline();
-
-        plugin.currentMaxPlayers = e.getResponse().getPlayers().getMax();
+        
+        e.setResponse(response);
+        
+        int online = response.getPlayers().getOnline();
+        plugin.currentMaxPlayers = response.getPlayers().getMax();
         plugin.currentOnlinePlayers = online;
         if (online > plugin.peakPlayers) {
             plugin.peakPlayers = online;
@@ -121,9 +128,10 @@ public class BungeeListener implements Listener {
         }
 
         ServerInfo info = plugin.getProxy().getServerInfo(plugin.defaultServerName);
-        if (p.getServer() != info) {
+
+        //Prevent infinite looping by checking that the player is not connected to the info.
+        if (p != null && p.getServer() != null && info != null && p.getServer() != info) {
             p.connect(info);
-            e.setCancelled(true);
             p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReason()).create());
             return;
         }

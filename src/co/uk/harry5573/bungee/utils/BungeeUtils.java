@@ -5,15 +5,17 @@
 package co.uk.harry5573.bungee.utils;
 
 import co.uk.harry5573.bungee.utils.commands.CommandAddServer;
+import co.uk.harry5573.bungee.utils.commands.CommandHelp;
 import co.uk.harry5573.bungee.utils.commands.CommandListServers;
 import co.uk.harry5573.bungee.utils.commands.CommandLobby;
-import co.uk.harry5573.bungee.utils.listener.BungeeListener;
 import co.uk.harry5573.bungee.utils.commands.CommandMaintenance;
 import co.uk.harry5573.bungee.utils.commands.CommandReload;
 import co.uk.harry5573.bungee.utils.commands.CommandRemoveServer;
 import co.uk.harry5573.bungee.utils.commands.CommandServer;
 import co.uk.harry5573.bungee.utils.enumerations.EnumMessage;
+import co.uk.harry5573.bungee.utils.listener.BungeeListener;
 import co.uk.harry5573.bungee.utils.util.MessageUtil;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,11 +29,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.craftminecraft.bungee.bungeeyaml.bukkitapi.file.FileConfiguration;
 import net.craftminecraft.bungee.bungeeyaml.bukkitapi.file.YamlConfiguration;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.ServerPing.PlayerInfo;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ServerPing.PlayerInfo;
 import net.md_5.bungee.api.plugin.PluginManager;
 
 /**
@@ -45,23 +47,19 @@ public class BungeeUtils extends Plugin implements Listener {
     public boolean maintenanceEnabled = true;
 
     public String defaultServerName;
-
     public PlayerInfo[] serverHoverPlayerListDefault;
     public PlayerInfo[] serverHoverPlayerListMaintenance;
-
     public ChatColor tabDefaultColor;
     public ChatColor tabStaffColor;
     public HashMap<EnumMessage, String> messages = Maps.newHashMap();
-
     public int peakPlayers = 0;
     public int currentMaxPlayers = 0;
     public int currentOnlinePlayers = 0;
-
     public boolean addListServers = true;
-
     public FileConfiguration config = null;
-    
     public String prefix = ChatColor.YELLOW + "[BungeeUtils] ";
+    public boolean helpEnabled = true;
+    public List<String> helpMessages = Lists.newArrayList();
 
     @Override
     public void onEnable() {
@@ -111,6 +109,11 @@ public class BungeeUtils extends Plugin implements Listener {
         this.tabStaffColor = ChatColor.valueOf(config.getString("tabcolor.staff"));
         this.peakPlayers = config.getInt("peakplayers");
         this.addListServers = config.getBoolean("addlistservers");
+        this.helpEnabled = config.getBoolean("help.enabled");
+
+        for (String helpMessage : config.getStringList("help.messages")) {
+            helpMessages.add(MessageUtil.translateToColorCode(helpMessage));
+        }
 
         List<String> hoverList = config.getStringList("hoverplayerlist");
         PlayerInfo[] info = new PlayerInfo[hoverList.size()];
@@ -144,6 +147,10 @@ public class BungeeUtils extends Plugin implements Listener {
         if (this.addListServers) {
             pm.registerCommand(this, new CommandServer(this, "server", "", new String[]{"listservers"}));
             pm.registerCommand(this, new CommandListServers(this, "listservers", "", new String[]{"serverlist"}));
+        }
+
+        if (this.helpEnabled) {
+            pm.registerCommand(this, new CommandHelp(this, "help", "", new String[]{"ehelp", "helpme", "helpop", "helparkham", "staff"}));
         }
 
         pm.registerCommand(this, new CommandReload(this, "bureload", "", new String[]{"abreload"}));

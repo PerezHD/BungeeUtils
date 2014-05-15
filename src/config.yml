@@ -1,14 +1,20 @@
 # BungeeUtils Configuration
+
+# The default (lobby) server
 defaultserver: hub
 
-# Do you want us to change /server and add /listservers?
+# Do you want us to change /server and add /listservers from vanilla to our custom ones?
 addlistservers: true
 
-# Don't touch this line. Its for logging purposes
+# Don't touch the 2 lines underneath thus.
 peakplayers: 0
-
-# Don't tocuh this line. For storage purposes.
 maintenancemode: true
+
+# Configure the custom /help commands.
+help:
+    enabled: true
+    messages:
+    - '&aCheckout &cwww.arkhamnetwork.org &afor help on our server!'
 
 messages:
     noperm: '&cPermission Denied'
