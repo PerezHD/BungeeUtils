@@ -75,7 +75,7 @@ public class BungeeListener implements Listener {
         }
         
         e.setResponse(response);
-        
+
         int online = response.getPlayers().getOnline();
         plugin.currentMaxPlayers = response.getPlayers().getMax();
         plugin.currentOnlinePlayers = online;
@@ -122,17 +122,20 @@ public class BungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onKickServer(ServerKickEvent e) {
         ProxiedPlayer p = e.getPlayer();
+
+        if (p == null) {
+            return;
+        }
+
         if (plugin.maintenanceEnabled && !p.hasPermission("bungeeutils.bypassmaintenance")) {
             p.disconnect(new ComponentBuilder("").append(plugin.messages.get(EnumMessage.KICKMAINTENANCE)).create());
             return;
         }
 
-        ServerInfo info = plugin.getProxy().getServerInfo(plugin.defaultServerName);
-
-        //Prevent infinite looping by checking that the player is not connected to the info.
-        if (p != null && p.getServer() != null && info != null && p.getServer() != info) {
-            p.connect(info);
-            p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.RED + e.getKickReason()).create());
+        if (p.getServer() != null && e.getCancelServer() != null && p.getServer() != e.getCancelServer()) {
+            //This will send them to the e.getCancelServer()
+            e.setCancelled(true);
+            p.sendMessage(new ComponentBuilder("").append(ChatColor.AQUA + "You were disconnected for: " + ChatColor.DARK_RED + e.getKickReason()).create());
             return;
         }
     }

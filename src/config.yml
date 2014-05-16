@@ -1,6 +1,8 @@
 # BungeeUtils Configuration
 
 # The default (lobby) server
+# Used in the /hub command.
+# This is not used in the server kick to lobby feature. That uses bungees default server and fallback server. 
 defaultserver: hub
 
 # Do you want us to change /server and add /listservers from vanilla to our custom ones?
